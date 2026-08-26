@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ── TDD gate — must pass before merge (enforce via branch protection) ──
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run test suite
+        run: pytest -v
+
+  # ── AI review via ops-factory's Forge ───────────────────────────────
+  forge-review:
+    uses: piyushvikas/demo_cli_agent/.github/workflows/forge-review.yml@v0
+    secrets:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      FORGE_PAT: ${{ secrets.FORGE_PAT }}
