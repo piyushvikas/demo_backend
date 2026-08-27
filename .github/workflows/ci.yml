@@ -33,3 +33,9 @@ jobs:
     secrets:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       FORGE_PAT: ${{ secrets.FORGE_PAT }}
+
+  # ── Deterministic secret scanning (gitleaks, not an LLM) ────────────
+  # NOTE: pinned to this branch since secret-scan.yml isn't merged to main
+  # yet — switch to @v0 once ops-factory PR #8 merges and releases.
+  secret-scan:
+    uses: piyushvikas/demo_cli_agent/.github/workflows/secret-scan.yml@upgrade-model-determinism-secretscan
