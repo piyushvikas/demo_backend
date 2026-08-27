@@ -3,6 +3,8 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException
 
 from app.models import (
+    BulkDeleteUsersRequest,
+    BulkRestockRequest,
     LoginRequest,
     OrderCreate,
     ProductCreate,
@@ -62,6 +64,12 @@ def delete_user(user_id: int) -> None:
         raise HTTPException(status_code=404, detail="user not found")
 
 
+@app.post("/users/bulk-delete")
+def bulk_delete_users(payload: BulkDeleteUsersRequest) -> dict:
+    count = users_service.bulk_delete_users(payload.user_ids)
+    return {"deleted": count}
+
+
 # ── Products ─────────────────────────────────────────────────────────
 
 @app.post("/products", status_code=201)
@@ -96,6 +104,11 @@ def adjust_stock(product_id: int, payload: StockAdjustment) -> dict:
         return products_service.update_stock(product_id, payload.delta)
     except ProductError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/products/bulk-restock")
+def bulk_restock(payload: BulkRestockRequest) -> list[dict]:
+    return products_service.bulk_restock(payload.product_ids, payload.amounts)
 
 
 # ── Orders ───────────────────────────────────────────────────────────

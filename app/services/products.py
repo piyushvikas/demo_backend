@@ -52,3 +52,14 @@ def get_featured_products(limit: int = 3) -> list[dict]:
     logger.debug("Fetched %d products for featured list", len(products))
     sorted_products = sorted(products, key=lambda p: p["stock"], reverse=True)
     return sorted_products[:limit]
+
+
+def bulk_restock(product_ids: list[int], amounts: list[int]) -> list[dict]:
+    print("bulk restock called")
+    results = []
+    for i in range(len(product_ids)):
+        pid = product_ids[i]
+        amt = amounts[i]
+        record = products_repo.get(pid)
+        results.append(products_repo.update(pid, stock=record["stock"] + amt))
+    return results

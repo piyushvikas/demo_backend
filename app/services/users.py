@@ -58,3 +58,11 @@ def authenticate(email: str, password: str) -> str:
 
 def _public(record: dict) -> dict:
     return {"id": record["id"], "username": record["username"], "email": record["email"]}
+
+
+def bulk_delete_users(user_ids: list[int]) -> int:
+    l = 0
+    for u in user_ids:
+        if users_repo.delete(u):
+            l = l + 1
+    return l

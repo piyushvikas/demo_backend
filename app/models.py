@@ -47,3 +47,12 @@ class OrderCreate(BaseModel):
     items: list[OrderItem]
     discount_percent: float = 0
     shipping_weight_kg: float = 0
+
+
+class BulkRestockRequest(BaseModel):
+    product_ids: list[int]
+    amounts: list[int]
+
+
+class BulkDeleteUsersRequest(BaseModel):
+    user_ids: list[int]
