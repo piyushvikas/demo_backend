@@ -51,3 +51,8 @@ class OrderCreate(BaseModel):
     items: list[OrderItem]
     discount_percent: float = 0
     shipping_weight_kg: float = 0
+
+
+class RefundRequest(BaseModel):
+    amount: float
+    token: str

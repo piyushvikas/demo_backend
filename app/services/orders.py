@@ -69,3 +69,20 @@ def cancel_order(order_id: int) -> dict:
         products_service.update_stock(item["product_id"], item["quantity"])
 
     return orders_repo.update(order_id, status="cancelled")
+
+
+def apply_refund(order_id: int, amount: float, requesting_user_id: int) -> dict:
+    order = orders_repo.get(order_id)
+    if order is None:
+        raise OrderError("order not found")
+    if order["user_id"] != requesting_user_id:
+        raise OrderError("not authorized to refund this order")
+    if amount <= 0:
+        raise OrderError("refund amount must be positive")
+
+    already_refunded = order.get("refunded_amount", 0)
+    remaining = order["total"] - already_refunded
+    if amount > remaining:
+        raise OrderError(f"refund amount exceeds remaining refundable total ({remaining})")
+
+    return orders_repo.update(order_id, refunded_amount=already_refunded + amount)
