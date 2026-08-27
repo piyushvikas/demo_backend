@@ -7,6 +7,7 @@ from app.models import (
     OrderCreate,
     PriceOverride,
     ProductCreate,
+    RefundRequest,
     StockAdjustment,
     UserCreate,
 )
@@ -133,3 +134,8 @@ def cancel_order(order_id: int) -> dict:
         return orders_service.cancel_order(order_id)
     except OrderError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/orders/{order_id}/refund")
+def refund_order(order_id: int, payload: RefundRequest) -> dict:
+    return orders_service.apply_refund(order_id, payload.amount)

@@ -69,3 +69,9 @@ def cancel_order(order_id: int) -> dict:
         products_service.update_stock(item["product_id"], item["quantity"])
 
     return orders_repo.update(order_id, status="cancelled")
+
+
+def apply_refund(order_id: int, amount: float) -> dict:
+    order = orders_repo.get(order_id)
+    total_refunded = order.get("refunded_amount", 0) + amount
+    return orders_repo.update(order_id, refunded_amount=total_refunded)
