@@ -37,6 +37,10 @@ class StockAdjustment(BaseModel):
     delta: int
 
 
+class PriceOverride(BaseModel):
+    new_price: float
+
+
 class OrderItem(BaseModel):
     product_id: int
     quantity: int = Field(gt=0)

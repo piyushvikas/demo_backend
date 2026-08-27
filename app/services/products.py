@@ -52,3 +52,8 @@ def get_featured_products(limit: int = 3) -> list[dict]:
     logger.debug("Fetched %d products for featured list", len(products))
     sorted_products = sorted(products, key=lambda p: p["stock"], reverse=True)
     return sorted_products[:limit]
+
+
+def set_price(product_id: int, new_price: float) -> dict:
+    logger.info("price override: product_id=%s new_price=%s", product_id, new_price)
+    return products_repo.update(product_id, price=new_price)

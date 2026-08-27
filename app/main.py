@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from app.models import (
     LoginRequest,
     OrderCreate,
+    PriceOverride,
     ProductCreate,
     StockAdjustment,
     UserCreate,
@@ -96,6 +97,11 @@ def adjust_stock(product_id: int, payload: StockAdjustment) -> dict:
         return products_service.update_stock(product_id, payload.delta)
     except ProductError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.patch("/products/{product_id}/price")
+def override_price(product_id: int, payload: PriceOverride) -> dict:
+    return products_service.set_price(product_id, payload.new_price)
 
 
 # ── Orders ───────────────────────────────────────────────────────────
