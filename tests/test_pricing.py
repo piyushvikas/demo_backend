@@ -2,6 +2,7 @@ import pytest
 
 from app.utils.pricing import (
     apply_discount,
+    calculate_bulk_discount_percent,
     calculate_discount,
     calculate_order_total,
     calculate_shipping,
@@ -89,6 +90,31 @@ def test_calculate_shipping(weight, expected):
 def test_calculate_shipping_negative_raises():
     with pytest.raises(ValueError):
         calculate_shipping(-1)
+
+
+@pytest.mark.parametrize(
+    "quantity,expected",
+    [
+        (0, 0.0),
+        (5, 0.0),
+        (9, 0.0),
+        (10, 5.0),
+        (19, 5.0),
+        (20, 10.0),
+        (49, 10.0),
+        (50, 15.0),
+        (99, 15.0),
+        (100, 20.0),
+        (500, 20.0),
+    ],
+)
+def test_calculate_bulk_discount_percent(quantity, expected):
+    assert calculate_bulk_discount_percent(quantity) == expected
+
+
+def test_calculate_bulk_discount_percent_negative_raises():
+    with pytest.raises(ValueError):
+        calculate_bulk_discount_percent(-1)
 
 
 def test_calculate_order_total_basic():

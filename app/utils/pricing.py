@@ -38,6 +38,21 @@ def calculate_shipping(weight_kg: float) -> float:
     return 39.99
 
 
+def calculate_bulk_discount_percent(quantity: int) -> float:
+    """Tiered bulk-purchase discount based on quantity ordered."""
+    if quantity < 0:
+        raise ValueError("quantity must be non-negative")
+    if quantity >= 100:
+        return 20.0
+    if quantity >= 50:
+        return 15.0
+    if quantity >= 20:
+        return 10.0
+    if quantity >= 10:
+        return 5.0
+    return 0.0
+
+
 def calculate_order_total(
     subtotal: float,
     discount_percent: float = 0,
