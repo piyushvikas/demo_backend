@@ -4,6 +4,7 @@ from app.services.products import (
     ProductError,
     create_product,
     delete_product,
+    get_featured_products,
     get_product,
     list_products,
     low_stock_products,
@@ -104,3 +105,35 @@ def test_delete_product_success():
 
 def test_delete_product_not_found():
     assert delete_product(999) is False
+
+
+def test_get_featured_products_empty():
+    assert get_featured_products() == []
+
+
+def test_get_featured_products_returns_at_most_default_limit():
+    for i in range(5):
+        create_product(f"Product {i}", 9.99, stock=i)
+    featured = get_featured_products()
+    assert len(featured) == 3
+
+
+def test_get_featured_products_sorted_by_stock_descending():
+    create_product("Low Stock", 9.99, stock=1)
+    create_product("High Stock", 9.99, stock=100)
+    create_product("Mid Stock", 9.99, stock=50)
+    featured = get_featured_products()
+    assert [p["name"] for p in featured] == ["High Stock", "Mid Stock", "Low Stock"]
+
+
+def test_get_featured_products_custom_limit():
+    for i in range(5):
+        create_product(f"Product {i}", 9.99, stock=i)
+    featured = get_featured_products(limit=2)
+    assert len(featured) == 2
+
+
+def test_get_featured_products_fewer_than_limit():
+    create_product("Only Product", 9.99, stock=10)
+    featured = get_featured_products()
+    assert len(featured) == 1

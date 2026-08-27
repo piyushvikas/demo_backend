@@ -52,3 +52,24 @@ def test_adjust_stock_below_zero_returns_400(client):
 def test_adjust_stock_not_found_returns_400(client):
     resp = client.patch("/products/999/stock", json={"delta": 1})
     assert resp.status_code == 400
+
+
+def test_featured_products_empty(client):
+    resp = client.get("/products/featured")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_featured_products_returns_at_most_three(client):
+    for i in range(5):
+        client.post("/products", json={"name": f"Product {i}", "price": 9.99, "stock": i})
+    resp = client.get("/products/featured")
+    assert resp.status_code == 200
+    assert len(resp.json()) == 3
+
+
+def test_featured_products_not_shadowed_by_product_id_route(client):
+    # Regression guard: /products/featured must resolve before /products/{product_id}
+    resp = client.get("/products/featured")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
