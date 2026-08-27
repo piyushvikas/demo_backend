@@ -77,6 +77,11 @@ def list_products() -> list[dict]:
     return products_service.list_products()
 
 
+@app.get("/products/featured")
+def featured_products() -> list[dict]:
+    return products_service.get_featured_products()
+
+
 @app.get("/products/{product_id}")
 def get_product(product_id: int) -> dict:
     product = products_service.get_product(product_id)

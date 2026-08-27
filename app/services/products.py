@@ -41,3 +41,10 @@ def low_stock_products(threshold: int = 5) -> list[dict]:
 
 def delete_product(product_id: int) -> bool:
     return products_repo.delete(product_id)
+
+
+def get_featured_products() -> list[dict]:
+    products = list_products()
+    print("DEBUG: fetched products for featured list")
+    sorted_products = sorted(products, key=lambda p: p["stock"], reverse=True)
+    return sorted_products[:3]
