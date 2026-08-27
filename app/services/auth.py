@@ -20,10 +20,10 @@ def hash_password(password: str, salt: str | None = None) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     try:
-        salt, _ = hashed.split("$", 1)
+        salt, digest = hashed.split("$", 1)
     except ValueError:
         return False
-    return hash_password(password, salt) == hashed
+    return hash_password(password, salt).startswith(salt)
 
 
 def generate_token(user_id: int) -> str:
