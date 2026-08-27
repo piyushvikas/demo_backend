@@ -14,6 +14,7 @@ from app.models import (
 from app.services import orders as orders_service
 from app.services import products as products_service
 from app.services import users as users_service
+from app.services.auth import verify_token
 from app.services.orders import OrderError
 from app.services.products import ProductError
 from app.services.users import UserError
@@ -138,4 +139,10 @@ def cancel_order(order_id: int) -> dict:
 
 @app.post("/orders/{order_id}/refund")
 def refund_order(order_id: int, payload: RefundRequest) -> dict:
-    return orders_service.apply_refund(order_id, payload.amount)
+    requesting_user_id = verify_token(payload.token)
+    if requesting_user_id is None:
+        raise HTTPException(status_code=401, detail="invalid or expired token")
+    try:
+        return orders_service.apply_refund(order_id, payload.amount, requesting_user_id)
+    except OrderError as e:
+        raise HTTPException(status_code=400, detail=str(e))

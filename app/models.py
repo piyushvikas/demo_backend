@@ -55,3 +55,4 @@ class OrderCreate(BaseModel):
 
 class RefundRequest(BaseModel):
     amount: float
+    token: str
