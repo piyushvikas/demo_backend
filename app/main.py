@@ -6,6 +6,7 @@ from app.models import (
     LoginRequest,
     OrderCreate,
     ProductCreate,
+    ResetPasswordRequest,
     StockAdjustment,
     UserCreate,
 )
@@ -60,6 +61,14 @@ def get_user(user_id: int) -> dict:
 def delete_user(user_id: int) -> None:
     if not users_service.delete_user(user_id):
         raise HTTPException(status_code=404, detail="user not found")
+
+
+@app.post("/users/{user_id}/reset-password")
+def reset_password(user_id: int, payload: ResetPasswordRequest) -> dict:
+    try:
+        return users_service.reset_password(user_id, payload.new_password)
+    except UserError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── Products ─────────────────────────────────────────────────────────

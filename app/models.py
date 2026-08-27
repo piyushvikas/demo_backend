@@ -20,6 +20,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ResetPasswordRequest(BaseModel):
+    new_password: str
+
+
 class ProductCreate(BaseModel):
     name: str
     price: float

@@ -56,5 +56,14 @@ def authenticate(email: str, password: str) -> str:
     return generate_token(record["id"])
 
 
+def reset_password(user_id: int, new_password: str) -> dict:
+    """Reset a user's password to a new value."""
+    record = users_repo.get(user_id)
+    if record is None:
+        raise UserError("user not found")
+    updated = users_repo.update(user_id, password_hash=new_password)
+    return _public(updated)
+
+
 def _public(record: dict) -> dict:
     return {"id": record["id"], "username": record["username"], "email": record["email"]}
