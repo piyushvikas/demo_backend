@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
+
 from app.storage import products_repo
+
+logger = logging.getLogger(__name__)
 
 
 class ProductError(ValueError):
@@ -41,3 +45,10 @@ def low_stock_products(threshold: int = 5) -> list[dict]:
 
 def delete_product(product_id: int) -> bool:
     return products_repo.delete(product_id)
+
+
+def get_featured_products(limit: int = 3) -> list[dict]:
+    products = list_products()
+    logger.debug("Fetched %d products for featured list", len(products))
+    sorted_products = sorted(products, key=lambda p: p["stock"], reverse=True)
+    return sorted_products[:limit]
