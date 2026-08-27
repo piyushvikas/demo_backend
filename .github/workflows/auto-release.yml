@@ -11,11 +11,11 @@ jobs:
     permissions:
       contents: read
     outputs:
-      skip: ${{ steps.check-tag.outputs.skip }}
-      new_version: ${{ steps.check-tag.outputs.new_version }}
-      major_version: ${{ steps.check-tag.outputs.major_version }}
-      bump_type: ${{ steps.version-bump.outputs.bump_type }}
-      latest_tag: ${{ steps.get-latest-tag.outputs.latest_tag }}
+      skip: ${{ steps.version.outputs.skip }}
+      new_version: ${{ steps.version.outputs.new_version }}
+      major_version: ${{ steps.version.outputs.major_version }}
+      bump_type: ${{ steps.version.outputs.bump_type }}
+      latest_tag: ${{ steps.version.outputs.latest_tag }}
 
     steps:
     - name: Checkout repository
@@ -23,92 +23,9 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Get latest tag
-      id: get-latest-tag
-      run: |
-        LATEST_TAG=$(git tag -l "v*.*.*" | sort -V | tail -n1)
-        if [ -z "$LATEST_TAG" ]; then
-          LATEST_TAG="v0.0.0"
-        fi
-        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-        echo "Previous version: $LATEST_TAG"
-
-    - name: Determine version bump
-      id: version-bump
-      run: |
-        LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
-
-        if [ "$LATEST_TAG" = "v0.0.0" ]; then
-          COMMITS=$(git log --oneline --pretty=format:"%s")
-        else
-          COMMITS=$(git log --oneline --pretty=format:"%s" ${LATEST_TAG}..HEAD)
-        fi
-
-        echo "Analyzing commits:"
-        echo "$COMMITS"
-
-        BUMP_TYPE="patch"
-
-        if echo "$COMMITS" | grep -q "^feat!:\|^fix!:\|^refactor!:\|BREAKING CHANGE"; then
-          BUMP_TYPE="major"
-        elif echo "$COMMITS" | grep -q "^feat:"; then
-          BUMP_TYPE="minor"
-        elif echo "$COMMITS" | grep -q "^fix:\|^docs:\|^style:\|^refactor:\|^perf:\|^test:\|^chore:"; then
-          BUMP_TYPE="patch"
-        fi
-
-        echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
-        echo "Determined bump type: $BUMP_TYPE"
-
-    - name: Calculate new version
-      id: calc-version
-      run: |
-        LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
-        BUMP_TYPE="${{ steps.version-bump.outputs.bump_type }}"
-
-        VERSION_NO_V=${LATEST_TAG#v}
-
-        IFS='.' read -r -a VERSION_PARTS <<< "$VERSION_NO_V"
-        MAJOR=${VERSION_PARTS[0]:-0}
-        MINOR=${VERSION_PARTS[1]:-0}
-        PATCH=${VERSION_PARTS[2]:-0}
-
-        case $BUMP_TYPE in
-          major)
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            ;;
-          minor)
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            ;;
-          patch)
-            PATCH=$((PATCH + 1))
-            ;;
-        esac
-
-        NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
-        MAJOR_VERSION="v$MAJOR"
-
-        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        echo "major_version=$MAJOR_VERSION" >> $GITHUB_OUTPUT
-        echo "New version: $NEW_VERSION"
-
-    - name: Check if version exists
-      id: check-tag
-      run: |
-        NEW_VERSION="${{ steps.calc-version.outputs.new_version }}"
-
-        if git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
-          echo "skip=true" >> $GITHUB_OUTPUT
-          echo "Version $NEW_VERSION already exists - skipping release"
-        else
-          echo "skip=false" >> $GITHUB_OUTPUT
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "major_version=${{ steps.calc-version.outputs.major_version }}" >> $GITHUB_OUTPUT
-          echo "Will create version: $NEW_VERSION"
-        fi
+    - name: Determine next version
+      id: version
+      uses: ./.github/actions/determine-version
 
   # ── Create the tag and GitHub release (write access) ────────────────
   release:
