@@ -7,7 +7,7 @@ every pull request.
 
 This is a demo/test fixture, not a real product — logic is intentionally
 simple (no real database, no production-grade auth) so the focus stays on
-the pipeline, not the app.
+the pipeline, not the app. Fcker
 
 ## Structure
 
